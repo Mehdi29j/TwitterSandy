@@ -1,0 +1,111 @@
+CREATE TABLE CC As select Screen_name, GEOID, count(*) from Tweet
+group by Screen_name, GEOID
+
+#####################################################################
+
+CREATE TABLE DD (
+    Screen_name TEXT,
+    GEOID INTEGER,
+    Cont INTEGER
+);
+
+INSERT INTO DD (Screen_name, GEOID, Cont)
+SELECT Screen_name, GEOID, count(*) From Tweet
+group by Screen_name, GEOID
+
+#####################################################################
+
+select Screen_name, max(Cont) as maxCont
+from DD
+group by Screen_name;
+
+#####################################################################
+
+CREATE TABLE EE (
+    Screen_name TEXT,
+    GEOID_Winner INTEGER,
+    Cont INTEGER
+);
+
+INSERT INTO EE (Screen_name, GEOID_Winner, Cont)
+select f.Screen_name, f.GEOID, f.Cont
+from (
+   select Screen_name, max(Cont) as maxCont
+   from DD group by Screen_name
+) as x inner join DD as f on f.Screen_name = x.Screen_name and f.Cont = x.maxCont;
+
+#####################################################################
+
+CREATE TABLE FF (
+    Screen_name TEXT,
+    GEOID_Winner INTEGER
+);
+
+INSERT INTO FF (Screen_name, GEOID_Winner)
+SELECT Screen_name, GEOID_Winner FROM EE
+WHERE GEOID_Winner != 111
+
+
+#####################################################################
+
+CREATE TABLE GG (
+    Screen_name TEXT,
+    GEOID_Winner INTEGER
+);
+
+INSERT INTO GG (Screen_name, GEOID_Winner)
+SELECT Screen_name, GEOID_Winner FROM FF
+GROUP BY Screen_name
+HAVING ( COUNT(Screen_name) = 1)
+
+#####################################################################
+
+DROP TABLE CC; 
+DROP TABLE DD;
+DROP TABLE EE;
+DROP TABLE FF;
+
+DELETE FROM Tweet
+WHERE Screen_name NOT IN (SELECT GG.Screen_name FROM GG)
+
+#########################################################################
+
+CREATE TABLE Final (
+    Text   TEXT,
+    Long INTEGER,
+    Lat INTEGER,
+    Date INTEGER,
+    Screen_name TEXT,
+    GEOID INTEGER,
+    GEOID_Winner INTEGER
+);
+
+
+INSERT INTO Final (Text, Long, Lat, Date, Screen_name, GEOID, GEOID_Winner)
+SELECT Tweet.Text, Tweet.Long, Tweet.Lat, Tweet.Date,Tweet.Screen_name, Tweet.GEOID, GG.GEOID_Winner
+From Tweet
+INNER JOIN GG ON Tweet.Screen_name = GG.Screen_name
+
+#########################################################################
+
+DROP TABLE GG; 
+DROP TABLE Tweet;
+
+#########################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

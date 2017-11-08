@@ -1,0 +1,121 @@
+# Required Packages and libraries
+require(plyr)
+require(RJSONIO)
+library(corrplot)
+library(class)
+library(dplyr)
+library(gmodels)
+library(rgdal)
+
+
+# Set the working directory
+setwd("C:/Users/jamale/Desktop")
+
+########################################################################
+######################### Data Prepration ##############################
+########################################################################
+
+# Read internal attributes of census tracts from Data folder. Internal attributes got from AmericanFactFinder database.
+# GEOID is the 11 digit number which is the code of each census tract.
+Age = read.csv("Census_Data/Age.csv", header=T)
+Education = read.csv("Census_Data/Education.csv", header=T)
+Education_field_of_study = read.csv("Census_Data/Education_field_of_study.csv", header=T)
+Ethnicity = read.csv("Census_Data/Ethnicity.csv", header=T)
+Housholders = read.csv("Census_Data/Housholders.csv", header=T)
+Unemployment = read.csv("Census_Data/Unemployment.csv", header=T)
+Per_Capita_Income = read.csv("Census_Data/Per_Capita_Income.csv", header=T)
+Poverty = read.csv("Census_Data/Poverty.csv", header=T)
+Transportation_to_work = read.csv("Census_Data/Transportation_to_work.csv", header=T)
+Income = read.csv("Census_Data/Income.csv", header=T)
+Work_Status = read.csv("Census_Data/Work_Status.csv", header=T)
+Job_Industry = read.csv("Census_Data/Job_Industry.csv", header=T)
+Mobility = read.csv("Census_Data/Mobility.csv", header=T)
+Mortgage = read.csv("Census_Data/Mortgage.csv", header=T)
+
+
+
+Intenral_attributes <- join_all(list(Age,Education,Education_field_of_study,Ethnicity,Housholders,Unemployment,Per_Capita_Income,Poverty,Transportation_to_work,Income,Work_Status,Job_Industry,Mobility,Mortgage), by = 'GEOID', type = 'full')
+
+Intenral_attributes <- data.frame(sapply(Intenral_attributes, function(x) as.numeric(as.character(x))))
+
+
+# Check the correlation of internal attributes
+# Remove rows with missing values
+Intenral_attributes <- Intenral_attributes[complete.cases(Intenral_attributes),]
+
+#M <- cor(Intenral_attributes[,-c(1)])
+#M[abs(M) == 1] <- 0
+#M[abs(M) < 0.5] <- 0
+
+#corrplot (M, method = "circle")
+
+
+# Extract tweets' Topics and GEOID from JSON file on desktop: Dis_Exp_Topic_Identified.json
+# Creade a DataFrame for Extracted JSON elements: GEOID and Topic
+out <- lapply(readLines("Non_Dis_Exp_Topic_Identified/Non_Dis_Exp_Topic_Identified.json.gz"), fromJSON)
+options(digits=11)
+
+CC <- lapply(out, `[[`, 1)
+tpc <- data.frame(matrix(unlist(CC), nrow=length(CC), byrow=T),stringsAsFactors=FALSE)
+
+CC <- lapply(out, `[[`, 2)
+long <- data.frame(matrix(unlist(CC), nrow=length(CC), byrow=T),stringsAsFactors=FALSE)
+
+CC <- lapply(out, `[[`, 3)
+lat <- data.frame(matrix(unlist(CC), nrow=length(CC), byrow=T),stringsAsFactors=FALSE)
+
+CC <- lapply(out, `[[`, 4)
+date <- data.frame(matrix(unlist(CC), nrow=length(CC), byrow=T),stringsAsFactors=FALSE)
+
+CC <- lapply(out, `[[`, 5)
+geo <- data.frame(matrix(as.numeric(unlist(CC)), nrow=length(CC), byrow=T),stringsAsFactors=FALSE)
+
+table((tpc[,1]))
+
+# Combine all dataframes: Census tracts GEOID, Topic of the tweet and lat/lng location (pts).
+Filtered_Tweets <- cbind(geo,tpc,date,long,lat)
+colnames(Filtered_Tweets) <- c("GEOID","Topic","Date_index","Longitude","Latitude")
+
+# Subset of rows based on Date_index
+# Determine the interval of the days: 
+Days <- c(25:99)
+Filtered_Tweets <- subset(Filtered_Tweets, Date_index %in% Days)
+
+###########################################################################################
+
+Census_Percent <- as.data.frame.matrix(table(Filtered_Tweets$GEOID, Filtered_Tweets$Topic))
+
+Census_Percent$GEOID <- rownames(Census_Percent)
+
+rownames(Census_Percent) <- 1:nrow(Census_Percent)
+
+Census_Percent <- Census_Percent[,c(ncol(Census_Percent),1:(ncol(Census_Percent)-1))]
+
+Census_Percent$Total <- rowSums(Census_Percent[,-1], na.rm=T)
+
+Census_Percent[,-1] <- Census_Percent[,-1] / Census_Percent$Total
+
+Census_Percent[,"Total"]  <- NULL
+
+Census_Percent[,-1] <-round(Census_Percent[,-1],3)
+
+# Create a dataframe for tweets' topics and internal attributes.
+Census_Percent_Attributes <- merge(Census_Percent,Intenral_attributes,by="GEOID")
+
+head(Census_Percent_Attributes)
+
+dim(Census_Percent_Attributes)
+
+#write.csv(Census_Percent_Attributes, file = "data.csv", row.names = FALSE)
+
+Responses <- Census_Percent_Attributes[,2:5]
+
+Covariates <- Census_Percent_Attributes[,6:ncol(Census_Percent_Attributes)]
+
+write.csv(Responses, file = "NonResponses.csv", row.names = FALSE)
+write.csv(Covariates, file = "NonCovariates.csv", row.names = FALSE)
+
+
+
+
+

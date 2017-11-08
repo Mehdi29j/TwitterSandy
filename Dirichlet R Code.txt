@@ -1,0 +1,42 @@
+library (DirichletReg)
+library(car)
+
+
+# Set the working directory
+setwd("C:/Users/jamale/Desktop")
+
+Responses <- read.csv("Responses.csv", header=T)
+
+Covariates <- read.csv("Covariates.csv", header=T)
+
+
+Data <- cbind(Responses, Covariates)
+
+dim(Data)
+
+
+Strong_Names <- c("Age_0_14","Age_15_24","Age_35_44","Age_45_54","Age_55_69","Age_70_100","Edu_24_college","Edu_25_college",      
+"Edu_25_STEM","Ethincity_African","Holder_alone","Unemply_16_24","Unemply_25_54","Unemply_55_99","Unemply_whites","Unemply_school",      
+"Unemply_college","Unemply_bachelor","Per_Capita_Income","Pct_blw_pvt_18","Pct_blw_pvt_65","Pct_blw_pvt_whites","Pct_blw_pvt_college","Pct_blw_pvt_bachelor",
+"Pct_blw_pvt_full","Pct_blw_pvt_part","Trans_to_work","Income_25_49","Income_50_74","Income_75_99","Wrk_50_52","Wrk_27_49",           
+"Wrk_1_26","Wrk_hrs_15_34" ,"Wrk_hrs_1_14","Job_isty_Agric","Job_isty_Const","Job_isty_Trade","Job_isty_Trans","Job_isty_Finan",      
+"Job_isty_Info","Job_isty_Prof" , "Job_isty_Arts","Job_isty_Public","Mobility_moved","Mortgage"    
+)
+
+Strong_Covariates <- Covariates[ ,which(names(Covariates) %in% Strong_Names)]
+
+Strong <- cbind(Responses, Strong_Covariates)
+
+head(Strong)
+dim(Strong)
+
+Strong$Y <- DR_data (Strong[,1:4])  # prepare the Y's
+
+Model <- DirichReg(Y ~ Age_0_14+Age_15_24+Age_35_44+Age_45_54+Age_55_69+Age_70_100+Edu_24_college+Edu_25_college+Edu_25_STEM+Ethincity_African+Holder_alone+Unemply_16_24+Unemply_25_54+Unemply_55_99+Unemply_whites+Unemply_school+Unemply_college+Unemply_bachelor+Per_Capita_Income+Pct_blw_pvt_18+Pct_blw_pvt_65+Pct_blw_pvt_whites+Pct_blw_pvt_college+Pct_blw_pvt_bachelor+Pct_blw_pvt_full+Pct_blw_pvt_part+Trans_to_work+Income_25_49+Income_50_74+Income_75_99+Wrk_50_52+Wrk_27_49+Wrk_1_26+Wrk_hrs_15_34+Wrk_hrs_1_14+Job_isty_Agric+Job_isty_Const+Job_isty_Trade+Job_isty_Trans+Job_isty_Finan+Job_isty_Info+Job_isty_Prof+Job_isty_Arts+Job_isty_Public+Mobility_moved+Mortgage, data=Strong)
+
+summary(Model)
+
+
+
+
+
