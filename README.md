@@ -1,5 +1,5 @@
 # TwitterSandy
-Python 2.7, R and SQL codes for analyzing of Twitter data in post-disaster recovery of hurricane Sandy  
+**Python 2.7, R and SQL codes for analyzing of Twitter data in post-disaster recovery of hurricane Sandy**  
 **All Tweets of Disaster Experienced.py:** Extract all Tweets of disaster experienced people from whole dataset  
 **Cleaning the Data.py:** Remove unnecessary fields from Tweets' JSON data structures and keep useful fields: Data Lat/Long Screen_name Text  
 **Dirichlet R Code:** R code to implementing Dirichlet Regression  
