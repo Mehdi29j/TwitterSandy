@@ -5,7 +5,7 @@ Cleaning the Data.py: Remove unnecessary fields from Tweets' JSON data structure
 Dirichlet R Code: R code to implementing Dirichlet Regression
 Disaster Related Tweets.py: Python Code Code to filter disaster related Tweets based on predefined keywords
 Dynaic Query Expansion.py: Python code to perform Dynaic Query Expansion which is the text mining machine learning algorithm useful for microblogging data
-Located Census Tract of Each Tweet.py: Python Code to find the location of each Tweet that is overlaid on census tract boundries
+# Located Census Tract of Each Tweet.py: Python Code to find the location of each Tweet that is overlaid on census tract boundries
 Python to SQL.py: Python code to create sqlite database from JSON 
 R creating data-frame: R code to create dataframe from internal attributes and join the data with identified topics
 SQL counting: SQL code to guess the place of living of each user based on majority of his/her located census tract
